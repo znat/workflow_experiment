@@ -1,0 +1,36 @@
+name: Create Branch and Add Content
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Name for the new branch'
+        required: true
+      content:
+        description: 'Content for content.txt'
+        required: true
+
+jobs:
+  create-branch-and-add-content:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install slugify
+        run: sudo npm install -g slugify
+
+      - name: Create and switch to new branch
+        run: |
+          BRANCH_SLUG=$(slugify "${{ github.event.inputs.branch_name }}" -r _)
+          git checkout -b $BRANCH_SLUG
+          git push --set-upstream origin $BRANCH_SLUG
+
+      - name: Create content.txt with input content
+        run: |
+          echo "${{ github.event.inputs.content }}" > content.txt
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add content.txt
+          git commit -m "Add content.txt with provided content"
+          git push
