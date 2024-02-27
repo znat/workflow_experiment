@@ -17,12 +17,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set Branch Slug as Environment Variable
+        run: echo "BRANCH_SLUG=$(echo '${{ github.event.inputs.branch_name }}' | tr '[:upper:]' '[:lower:]' | sed -e 's/ /-/g' -e 's/[^a-z0-9-]//g')" >> $GITHUB_ENV
+
       - name: Create and switch to new branch
         run: |
           BRANCH_NAME="${{ github.event.inputs.branch_name }}"
           BRANCH_SLUG=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed -e 's/ /-/g' -e 's/[^a-z0-9-]//g')
-          git checkout -b $BRANCH_SLUG
-          git push --set-upstream origin $BRANCH_SLUG
+          git checkout -b process.env.BRANCH_SLUG
+          git push --set-upstream origin process.env.BRANCH_SLUG
 
       - name: Create content.txt with input content
         run: |
@@ -38,11 +41,10 @@ jobs:
         with:
           script: |
             const branchName = core.getInput('branch_name');
-            const branchSlug = "${{ env.BRANCH_SLUG }}"; // Make sure this environment variable is set correctly
             const title = branchName;
             const body = 'Automatically generated pull request.';
-            const base = 'main'; // Adjust this as per your repo's default branch
-            const head = branchSlug;
+            const base = 'main';
+            const head = process.env.BRANCH_SLUG;
 
             const createPr = await github.rest.pulls.create({
               owner: context.repo.owner,
