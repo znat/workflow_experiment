@@ -19,8 +19,8 @@ jobs:
 
       - name: Create and switch to new branch
         run: |
-          BRANCH_SLUG=$("${{ github.event.inputs.branch_name | tr '[:upper:]' '[:lower:]' | sed -e 's/ /-/g' -e 's/[^a-z0-9-]//g'}}" -r _)
-          echo "BRANCH_SLUG=${BRANCH_SLUG}" >> $GITHUB_ENV
+          BRANCH_NAME="${{ github.event.inputs.branch_name }}"
+          BRANCH_SLUG=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed -e 's/ /-/g' -e 's/[^a-z0-9-]//g')
           git checkout -b $BRANCH_SLUG
           git push --set-upstream origin $BRANCH_SLUG
 
@@ -40,7 +40,7 @@ jobs:
             const github = require('@actions/github');
             const core = require('@actions/core');
             const branchName = core.getInput('branch_name');
-            const branchSlug = process.env.BRANCH_SLUG;
+            const branchSlug = "${{ env.BRANCH_SLUG }}";
             const title = branchName;
             const body = 'Automatically generated pull request.';
             const base = 'main'; // Change this to your repository's default branch if different
