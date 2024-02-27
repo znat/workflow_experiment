@@ -13,10 +13,6 @@ on:
 jobs:
   create-branch-and-add-content:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
     outputs:
       branch_name: ${{ steps.set_branch_info.outputs.branch_name }}
       branch_slug: ${{ steps.set_branch_info.outputs.branch_slug }}
