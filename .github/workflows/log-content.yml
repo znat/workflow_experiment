@@ -17,12 +17,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install slugify
-        run: sudo npm install -g slugify
-
       - name: Create and switch to new branch
         run: |
-          BRANCH_SLUG=$(slugify "${{ github.event.inputs.branch_name }}" -r _)
+          BRANCH_SLUG=$("${{ github.event.inputs.branch_name | tr '[:upper:]' '[:lower:]' | sed -e 's/ /-/g' -e 's/[^a-z0-9-]//g'}}" -r _)
           echo "BRANCH_SLUG=${BRANCH_SLUG}" >> $GITHUB_ENV
           git checkout -b $BRANCH_SLUG
           git push --set-upstream origin $BRANCH_SLUG
