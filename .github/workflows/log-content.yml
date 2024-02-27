@@ -37,13 +37,12 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const github = require('@actions/github');
             const core = require('@actions/core');
             const branchName = core.getInput('branch_name');
-            const branchSlug = "${{ env.BRANCH_SLUG }}";
+            const branchSlug = "${{ env.BRANCH_SLUG }}"; // Make sure this environment variable is set correctly
             const title = branchName;
             const body = 'Automatically generated pull request.';
-            const base = 'main'; // Change this to your repository's default branch if different
+            const base = 'main'; // Adjust this as per your repo's default branch
             const head = branchSlug;
 
             const createPr = await github.rest.pulls.create({
@@ -57,3 +56,4 @@ jobs:
 
             core.setOutput('pr_number', createPr.data.number);
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
