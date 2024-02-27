@@ -1,4 +1,4 @@
-name: Create Branch and Add Content
+name: Create Branch, Add Content, and Create Pull Request
 
 on:
   workflow_dispatch:
@@ -23,6 +23,7 @@ jobs:
       - name: Create and switch to new branch
         run: |
           BRANCH_SLUG=$(slugify "${{ github.event.inputs.branch_name }}" -r _)
+          echo "BRANCH_SLUG=${BRANCH_SLUG}" >> $GITHUB_ENV
           git checkout -b $BRANCH_SLUG
           git push --set-upstream origin $BRANCH_SLUG
 
@@ -34,3 +35,28 @@ jobs:
           git add content.txt
           git commit -m "Add content.txt with provided content"
           git push
+
+      - name: Create Pull Request
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const github = require('@actions/github');
+            const core = require('@actions/core');
+            const branchName = core.getInput('branch_name');
+            const branchSlug = process.env.BRANCH_SLUG;
+            const title = branchName;
+            const body = 'Automatically generated pull request.';
+            const base = 'main'; // Change this to your repository's default branch if different
+            const head = branchSlug;
+
+            const createPr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              head: head,
+              base: base,
+            });
+
+            core.setOutput('pr_number', createPr.data.number);
+          github-token: ${{ secrets.GITHUB_TOKEN }}
