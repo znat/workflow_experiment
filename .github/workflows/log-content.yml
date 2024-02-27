@@ -30,8 +30,8 @@ jobs:
 
       - name: Create and switch to new branch
         run: |
-          git checkout -b ${{ needs.create-branch-and-add-content.outputs.branch_slug }}
-          git push --set-upstream origin ${{ needs.create-branch-and-add-content.outputs.branch_slug }}
+          git checkout -b ${{ steps.set_branch_info.outputs.branch_slug }}
+          git push --set-upstream origin ${{ steps.set_branch_info.outputs.branch_slug }}
 
       - name: Create content.txt with input content
         run: |
@@ -50,7 +50,7 @@ jobs:
             const title = branchName;
             const body = 'Automatically generated pull request.';
             const base = 'main';
-            const head = ${{ needs.create-branch-and-add-content.outputs.branch_name }};
+            const head = ${{ steps.set_branch_info.outputs.branch_slug }};
 
             const createPr = await github.rest.pulls.create({
               owner: context.repo.owner,
