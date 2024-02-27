@@ -17,15 +17,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set Branch Slug as Environment Variable
-        run: echo "BRANCH_SLUG=$(echo '${{ github.event.inputs.branch_name }}' | tr '[:upper:]' '[:lower:]' | sed -e 's/ /-/g' -e 's/[^a-z0-9-]//g')" >> $GITHUB_ENV
+    outputs:
+      branch_name: ${{ steps.set_branch_info.outputs.branch_name }}
+      branch_slug: ${{ steps.set_branch_info.outputs.branch_slug }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Create and switch to new branch
+      - name: Set Branch Info
+        id: set_branch_info
         run: |
           BRANCH_NAME="${{ github.event.inputs.branch_name }}"
           BRANCH_SLUG=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed -e 's/ /-/g' -e 's/[^a-z0-9-]//g')
-          git checkout -b process.env.BRANCH_SLUG
-          git push --set-upstream origin process.env.BRANCH_SLUG
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "branch_slug=$BRANCH_SLUG" >> $GITHUB_OUTPUT
+
+      - name: Create and switch to new branch
+        run: |
+          git checkout -b ${{ needs.create-branch-and-add-content.outputs.branch_slug }}
+          git push --set-upstream origin ${{ needs.create-branch-and-add-content.outputs.branch_slug }}
 
       - name: Create content.txt with input content
         run: |
@@ -44,7 +54,7 @@ jobs:
             const title = branchName;
             const body = 'Automatically generated pull request.';
             const base = 'main';
-            const head = process.env.BRANCH_SLUG;
+            const head = ${{ needs.create-branch-and-add-content.outputs.branch_name }};
 
             const createPr = await github.rest.pulls.create({
               owner: context.repo.owner,
