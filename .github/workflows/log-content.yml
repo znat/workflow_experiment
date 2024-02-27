@@ -37,7 +37,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const core = require('@actions/core');
             const branchName = core.getInput('branch_name');
             const branchSlug = "${{ env.BRANCH_SLUG }}"; // Make sure this environment variable is set correctly
             const title = branchName;
